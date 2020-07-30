@@ -87,10 +87,7 @@ while tests:
         curr.output = curr.output.strip()
         raw_out = scheme.communicate(input=curr.test)[0]
         print(f"\033[4mCase {count}\033[0m:")
-        # try:
         test_out = curr.run(raw_out[:raw_out.index("\nscm>")])
-        # except ValueError as e:
-        #     sys.exit()
         print(test_out[0])
         if args.v:
             correct += int(test_out[1])
