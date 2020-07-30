@@ -9,6 +9,7 @@ parser.add_argument("-v", dest="v", action="store_const", const=True, default=Fa
 args = parser.parse_args()
 
 src = ""
+version = "0.1.1"
 
 class Doctest():
 
@@ -59,12 +60,19 @@ if args.func != "all":
         sys.exit("Invalid function name")
     tests = {key:tests[key] for key in tests.keys() if key == remove[0]}
 
-print(f"=====================================================================\nAssignment: Discussion {src[src.index('.') - 2:src.index('.')]}\nOK-disc, version v0.1.0\
+print(f"=====================================================================\nAssignment: Discussion {src[src.index('.') - 2:src.index('.')]}\nOK-disc, version v{version}\
 \n=====================================================================\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
 \nRunning tests\n")
 
 prev = None
 total = correct = 0
+check = '(load-all ".")'
+scheme = subprocess.Popen(["scheme", "-i", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
+parens = scheme.communicate(input=check)
+for line in parens:
+    if "SyntaxError" in line:
+        sys.exit(f"scm> {check}\n # Error: unexpected end of file\n")
+scheme.stdin.close()
 while tests:
     scheme = subprocess.Popen(["scheme", "-i", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
     for line in scheme.stdout:
@@ -79,7 +87,10 @@ while tests:
         curr.output = curr.output.strip()
         raw_out = scheme.communicate(input=curr.test)[0]
         print(f"\033[4mCase {count}\033[0m:")
+        # try:
         test_out = curr.run(raw_out[:raw_out.index("\nscm>")])
+        # except ValueError as e:
+        #     sys.exit()
         print(test_out[0])
         if args.v:
             correct += int(test_out[1])
