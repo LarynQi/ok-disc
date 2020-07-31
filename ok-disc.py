@@ -12,7 +12,7 @@ parser.add_argument("-v", dest="v", action="store_const", const=True, default=Fa
 args = parser.parse_args()
 
 src = ""
-version = "0.1.2"
+version = "0.1.3"
 url = "https://github.com/LarynQi/LarynQi.github.io/raw/master/assets/scheme"
 ssl._create_default_https_context = ssl._create_unverified_context
 urllib.request.urlretrieve(url, "scheme")
@@ -20,12 +20,8 @@ urllib.request.urlretrieve(url, "scheme")
 system = platform.system()
 if system == "Darwin":
     python = "python3"
-    BOLD = "\033[1m"
-    ITALIC = "\033[4m"
-    END = "\033[0m"
 else:
     python = "python"
-    BOLD = ITALIC = END = ""
 
 class Doctest():
 
@@ -89,6 +85,7 @@ for line in parens:
     if "SyntaxError" in line:
         sys.exit(f"scm> {check}\n # Error: unexpected end of file\n")
 scheme.stdin.close()
+result = ""
 while tests:
     scheme = subprocess.Popen([python, "scheme", "-i", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
     for line in scheme.stdout:
@@ -98,7 +95,7 @@ while tests:
         if not prev:
             count = 1
             if args.v:
-                print(f"---------------------------------------------------------------------\nDoctests for {BOLD}{t[t.index('-') + 2:]}{END}\n")
+                result += f"---------------------------------------------------------------------\nDoctests for {t[t.index('-') + 2:]}\n\n"
             prev = t
         curr = tests[t][0]
         curr.output = curr.output.strip()
@@ -106,8 +103,8 @@ while tests:
         test_out = curr.run(raw_out[:raw_out.index("\nscm>")])
         total += 1
         if args.v:
-            print(f"{ITALIC}Case {count}{END}:")
-            print(test_out[0])
+            result += f"Case {count}:\n"
+            result += f"{test_out[0]}\n"
         elif not test_out[1]:
             break
         correct += int(test_out[1])
@@ -119,12 +116,13 @@ while tests:
     scheme.stdin.close()
 
 
-print(f"---------------------------------------------------------------------\nTest summary")
+result += f"---------------------------------------------------------------------\nTest summary\n"
 if args.v:
-    print(f"    Passed: {correct}\n    Failed: {total - correct}\n[ooooook....] {100 * round(correct / total, 3)}% passed\n")
+    result += f"    Passed: {correct}\n    Failed: {total - correct}\n[ooooook....] {100 * round(correct / total, 3)}% passed\n"
 else:
     if correct == total:
-        print(f"    {correct} test cases passed! No cases failed.\n")
+        result += f"    {correct} test cases passed! No cases failed.\n"
     else:
-        print(f"    {correct} test case passed before encountering first failed test case")
-sys.exit(0)
+        result += f"    {correct} test case passed before encountering first failed test case\n"
+
+print(result)
