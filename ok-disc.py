@@ -2,14 +2,30 @@ import subprocess
 import re
 import argparse
 import sys
+import urllib.request
+import ssl
+import platform
 
 parser = argparse.ArgumentParser(description="Test your work")
-parser.add_argument("func", metavar="function_to_test", help="Function to be tested")
+parser.add_argument("func", metavar="function_to_test", nargs="?", help="Function to be tested")
 parser.add_argument("-v", dest="v", action="store_const", const=True, default=False, help="Verbose output")
 args = parser.parse_args()
 
 src = ""
-version = "0.1.1"
+version = "0.1.2"
+url = "https://github.com/LarynQi/LarynQi.github.io/raw/master/assets/scheme"
+ssl._create_default_https_context = ssl._create_unverified_context
+urllib.request.urlretrieve(url, "scheme")
+
+system = platform.system()
+if system == "Darwin":
+    python = "python3"
+    BOLD = "\033[1m"
+    ITALIC = "\033[4m"
+    END = "\033[0m"
+else:
+    python = "python"
+    BOLD = ITALIC = END = ""
 
 class Doctest():
 
@@ -52,7 +68,7 @@ with open(src, "r") as f:
             found = True
             question = line[2:line.index("\n")]
 
-if args.func != "all":
+if args.func:
     remove = list(filter(lambda func: func[-len(args.func):] == args.func, tests.keys()))
     if len(remove) > 1:
         sys.exit("Unexpected error")
@@ -67,44 +83,48 @@ print(f"=====================================================================\nA
 prev = None
 total = correct = 0
 check = '(load-all ".")'
-scheme = subprocess.Popen(["scheme", "-i", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
+scheme = subprocess.Popen([python, "scheme", "-i", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
 parens = scheme.communicate(input=check)
 for line in parens:
     if "SyntaxError" in line:
         sys.exit(f"scm> {check}\n # Error: unexpected end of file\n")
 scheme.stdin.close()
 while tests:
-    scheme = subprocess.Popen(["scheme", "-i", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
+    scheme = subprocess.Popen([python, "scheme", "-i", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
     for line in scheme.stdout:
         break
     if tests:
         t = next(iter(tests.keys()))
         if not prev:
             count = 1
-            print(f"---------------------------------------------------------------------\nDoctests for \033[1m{t[t.index('-') + 2:]}\033[0m\n")
+            if args.v:
+                print(f"---------------------------------------------------------------------\nDoctests for {BOLD}{t[t.index('-') + 2:]}{END}\n")
             prev = t
         curr = tests[t][0]
         curr.output = curr.output.strip()
-        raw_out = scheme.communicate(input=curr.test)[0]
-        print(f"\033[4mCase {count}\033[0m:")
+        raw_out = scheme.communicate(input=curr.test)[0]   
         test_out = curr.run(raw_out[:raw_out.index("\nscm>")])
-        print(test_out[0])
+        total += 1
         if args.v:
-            correct += int(test_out[1])
-            total += 1
+            print(f"{ITALIC}Case {count}{END}:")
+            print(test_out[0])
         elif not test_out[1]:
             break
+        correct += int(test_out[1])
         tests[t].remove(curr)
         count += 1
         if not tests[t]:
             tests.pop(t)
             prev = None
-        scheme.stdin.close()
+    scheme.stdin.close()
 
+
+print(f"---------------------------------------------------------------------\nTest summary")
 if args.v:
-    print(f"---------------------------------------------------------------------\n\
-Test summary\n\
-    Passed: {correct}\n\
-    Failed: {total - correct}\n\
-[ooooook....] {100 * round(correct / total, 3)}% passed\n")
+    print(f"    Passed: {correct}\n    Failed: {total - correct}\n[ooooook....] {100 * round(correct / total, 3)}% passed\n")
+else:
+    if correct == total:
+        print(f"    {correct} test cases passed! No cases failed.\n")
+    else:
+        print(f"    {correct} test case passed before encountering first failed test case")
 sys.exit(0)
