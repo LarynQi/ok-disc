@@ -34,3 +34,4 @@ A Python client for autograding Python and Scheme discussion files. Based on the
 * Allow specific cases to be tested
 * Opt-in backups
 * Auto-update local clients from this repo if version is not up-to-date
+* Instead of parsing of source files line by line, read the files in their entirety and match regex patterns
