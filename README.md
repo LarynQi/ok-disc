@@ -22,22 +22,3 @@ A Python client for autograding Python and Scheme discussion files. Based on the
 ### v0.1.0 - 7/30/20
 * First release
 * Local autograding handled for `.scm` files
-
-## TODO
-* More versatile Makefile
-  * Error-handling
-  * Auto-compile with configurable `src`
-  * Auto-create a directory with the necessary `src` files, executable `ok` and `scheme`, and compress
-    * Potentially auto-move this `.zip` to website assets and automatically `git push` to `master`
-* Only download `scheme` if not already present
-* Run tests from both `.scm` and `.py` files seamlessly
-* Allow specific cases to be tested
-* Opt-in backups
-* Auto-update local clients from this repo if version is not up-to-date
-* Instead of parsing of source files line by line, read the files in their entirety and match regex patterns
-* Allow for multi-line doctest inputs
-* Formatting multi-line error output
-* Displaying first failed test with `python3 ok`
-* Handling WWPD `Error` user input
-* Only load the relevant parts of the file for each question (maybe)
-* Persistent interactive Scheme session for each question
