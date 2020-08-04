@@ -12,7 +12,7 @@ parser.add_argument("func", metavar="function_to_test", nargs="?", help="Functio
 parser.add_argument("-v", dest="v", action="store_const", const=True, default=False, help="Verbose output")
 args = parser.parse_args()
 
-src = ""
+src = "sol12.scm"
 if src not in os.listdir():
     sys.exit("Please do not change the names of the provided files")
 version = "0.1.4"
@@ -136,6 +136,6 @@ else:
     if correct == total:
         result += f"    {correct} test cases passed! No cases failed.\n"
     else:
-        result += f"    {correct} test case passed before encountering first failed test case\n"
+        result += f"    {correct} test case(s) passed before encountering first failed test case\n"
 
 print(result)
