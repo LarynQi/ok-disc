@@ -5,6 +5,7 @@ import sys
 import urllib.request
 import ssl
 import platform
+import os
 
 parser = argparse.ArgumentParser(description="Test your work")
 parser.add_argument("func", metavar="function_to_test", nargs="?", help="Function to be tested")
@@ -12,7 +13,9 @@ parser.add_argument("-v", dest="v", action="store_const", const=True, default=Fa
 args = parser.parse_args()
 
 src = ""
-version = "0.1.3"
+if src not in os.listdir():
+    sys.exit("Please do not change the names of the provided files")
+version = "0.1.4"
 url = "https://github.com/LarynQi/LarynQi.github.io/raw/master/assets/scheme"
 ssl._create_default_https_context = ssl._create_unverified_context
 urllib.request.urlretrieve(url, "scheme")
@@ -33,14 +36,21 @@ class Doctest():
         base = f"scm> {self.test}\n{self.output}\n"
         if actual == self.output:
             return f"{base}-- OK! --\n", True
-        return f"{base}Error: expected\n     {self.output}\nbut got\n     {actual}\n", False
+        tab = "     "
+        spaced_actual = ""
+        for c in actual:
+            if c == "\n":
+                spaced_actual += f"{c}{tab}"
+            else:
+                spaced_actual += c
+        return f"{base}Error: expected\n     {self.output}\nbut got\n{tab}{spaced_actual}\n", False
 
     def __str__(self):
         return f"Input: {self.test}, Output: {self.output}"
 
-doctest = re.compile(r"; Q\d\.\d - .*")
+doctest = re.compile(r"; Q\d\.\d.* - .*")
 expect = re.compile(r"; expect .*")
-test = re.compile(r"; \(.*\)\n")
+test = re.compile(r"; .*\n")
 no_tests = re.compile(r";;; No Tests\n")
 buf = re.compile(r";;; Tests\n")
 
@@ -51,12 +61,12 @@ with open(src, "r") as f:
         if found:
             if re.match(buf, line):
                 pass
-            elif re.match(test, line):
-                tests[question] = tests.get(question, []) + [Doctest(line.strip()[2:])]
             elif re.match(expect, line):
                 tests[question][len(tests[question]) - 1].output += line.strip()[9:] + "\n"
             elif line == "\n" or re.match(no_tests, line):
                 found = False
+            elif re.match(test, line):
+                tests[question] = tests.get(question, []) + [Doctest(line.strip()[2:])]
             else:
                 print(line)
                 sys.exit("Invalid doctest format")
@@ -106,6 +116,9 @@ while tests:
             result += f"Case {count}:\n"
             result += f"{test_out[0]}\n"
         elif not test_out[1]:
+            result += f"---------------------------------------------------------------------\nDoctests for {t[t.index('-') + 2:]}\n\n"
+            result += f"Case {count}:\n"
+            result += f"{test_out[0]}\n"
             break
         correct += int(test_out[1])
         tests[t].remove(curr)
