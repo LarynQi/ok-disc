@@ -3,12 +3,9 @@
 A Python client for autograding Python and Scheme discussion files. Based on the [OK](https://github.com/okpy/ok-client) autograding system 
 
 ## Changelog
-### v0.1.0 - 7/30/20
-* First release
-* Local autograding handled for `.scm` files
-
-### v0.1.1 - 7/30/20
-* Add `(load-all ".")` to check for unmatched parentheses
+### v0.1.3 - 7/31/20
+* Get rid of String formatting entirely (Bold, Italics, End)
+* For verbose output, print out the entire output at once instead of multiple `print` statements
 
 ### v0.1.2 - 7/31/20
 * Add auto-download `scheme` executable from personal website
@@ -19,9 +16,12 @@ A Python client for autograding Python and Scheme discussion files. Based on the
   * Have non-verbose outputs display how many test cases passed (until first failed case if there is a failure)
 * Generalize for Windows (`python` vs `python3`, String formatting)
 
-### v0.1.3 - 7/31/20
-* Get rid of String formatting entirely (Bold, Italics, End)
-* For verbose output, print out the entire output at once instead of multiple `print` statements
+### v0.1.1 - 7/30/20
+* Add `(load-all ".")` to check for unmatched parentheses
+
+### v0.1.0 - 7/30/20
+* First release
+* Local autograding handled for `.scm` files
 
 ## TODO
 * More versatile Makefile
@@ -35,3 +35,9 @@ A Python client for autograding Python and Scheme discussion files. Based on the
 * Opt-in backups
 * Auto-update local clients from this repo if version is not up-to-date
 * Instead of parsing of source files line by line, read the files in their entirety and match regex patterns
+* Allow for multi-line doctest inputs
+* Formatting multi-line error output
+* Displaying first failed test with `python3 ok`
+* Handling WWPD `Error` user input
+* Only load the relevant parts of the file for each question (maybe)
+* Persistent interactive Scheme session for each question
