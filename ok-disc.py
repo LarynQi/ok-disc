@@ -12,7 +12,7 @@ parser.add_argument("func", metavar="function_to_test", nargs="?", help="Functio
 parser.add_argument("-v", dest="v", action="store_const", const=True, default=False, help="Verbose output")
 args = parser.parse_args()
 
-src = "sol12.scm"
+src = ""
 if src not in os.listdir():
     sys.exit("Please do not change the names of the provided files")
 version = "0.1.4"
