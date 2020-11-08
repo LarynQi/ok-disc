@@ -3,6 +3,13 @@
 A Python client for autograding Python and Scheme discussion files. Based on the [OK](https://github.com/okpy/ok-client) autograding system 
 
 ## Changelog
+### v0.1.4 - 8/4/20
+* Ensure files in the current directory have not been renamed
+* Fixed tabbing for multi-line erroneous output (resolved [#9](https://github.com/LarynQi/ok-disc/issues/9))
+* Improved/more generalized doctest recognition
+  * Allow for question numbers like `Q1.5i`
+* `python3 ok` now shows logs for the first failed test case if any failed (resolved [#10](https://github.com/LarynQi/ok-disc/issues/10))
+
 ### v0.1.3 - 7/31/20
 * Get rid of String formatting entirely (Bold, Italics, End)
 * For verbose output, print out the entire output at once instead of multiple `print` statements
