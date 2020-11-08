@@ -145,10 +145,15 @@ cython_debug/
 # Added .DS_Store for MacOS
 .DS_Store
 
-# Added say.wav for TTS
-/assets/say.wav
-
 # Relevant autograder files
-scheme
 ok
 *.scm
+
+# bombast
+bombast/
+
+# Build output
+out/
+
+# Zip output
+zips/
