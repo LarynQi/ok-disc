@@ -3,6 +3,25 @@
 A Python client for autograding Python and Scheme discussion files. Based on the [OK](https://github.com/okpy/ok-client) autograding system 
 
 ## Changelog
+
+### v0.1.5 - 11/7/20
+* `ok-disc`
+  * Fix Python version compatability by forgoing compilation
+  * Instead, use `bombast` and send obfuscated source code
+  * Converted all fstrings to `.format`'s for `bombast` to run properly
+* Directory structure
+  * `src`: Source code files (e.g. `mentor12.scm`)
+  * `out`: Output folder containing source code file, `ok` executable, and any necessary interpreters (to be zipped)
+  * `zips`: Contains zips ready to be released
+* `Makefile`
+  * Updated `make build` to generate `out` files
+  * Added `make zip` target to compress `out` into a zip
+  * Updated `make clean` to conform to new directory structure (cleans `out` folder)
+  * Addded `make clean-zips` to remove generated zips
+* Scripts:
+  * `copy.sh`: Copies zip file to target destination in website repo
+  * `deploy.sh`: Copies zip file to target destination in website repo and pushes a commit to redeploy website
+ 
 ### v0.1.4 - 8/4/20
 * Ensure files in the current directory have not been renamed
 * Fixed tabbing for multi-line erroneous output (resolved [#9](https://github.com/LarynQi/ok-disc/issues/9))
