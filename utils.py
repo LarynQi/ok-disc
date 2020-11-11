@@ -35,10 +35,6 @@ def _search(src, language):
                     if language != Language.PYTHON:
                         import sys
                         sys.exit("Invalid doctest format")
-                    # if not re.match(re.compile(r"def.*"), line):
-                    #     print(line)
-                    #     sys.exit("Invalid doctest format")
-
             elif re.match(language.formatting.doctest, line):
                 found = True
                 if language != Language.PYTHON:
@@ -136,7 +132,7 @@ class Doctest:
                 spaced_output += c + tab
             else:
                 spaced_output += c
-        return base + "Error: expected\n{!s}{!s}\nbut got\n{!s}{!s}\n".format(tab, spaced_output, tab, spaced_actual[:-1] if spaced_actual[len(spaced_actual) - 1] == "\n" else spaced_actual), False
+        return base + "\nError: expected\n{!s}{!s}\nbut got\n{!s}{!s}\n".format(tab, spaced_output, tab, spaced_actual[:-1] if spaced_actual[len(spaced_actual) - 1] == "\n" else spaced_actual), False
 
     def __str__(self):
         return "Q{!s} - Input: {!s}, Output: {!s}".format(self.number, self.test, self.output)

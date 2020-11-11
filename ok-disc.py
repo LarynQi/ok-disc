@@ -16,18 +16,16 @@ import urllib.request
 import ssl
 import platform
 import os
-from utils import *
 from languages import *
 
-parser = argparse.ArgumentParser(description="Test your work")
-parser.add_argument("func", metavar="function_to_test", nargs="?", help="Function to be tested")
-parser.add_argument("-v", dest="v", action="store_const", const=True, default=False, help="Verbose output")
-# parser.add_argument("-q", dest="decrypt", action="store_const", const=True, default=False, help="Decrypt next exam question")
+parser = argparse.ArgumentParser(description="A lightweight autograder to test your work!")
+parser.add_argument("func", metavar="function_to_test", nargs="?", default=None, help="function to be tested (optional)")
+parser.add_argument("-v", dest="v", action="store_const", const=True, default=False, help="verbose output")
+parser.add_argument("-q", metavar="question_name", dest="q", nargs=1, type=str, default=None, help="question to be tested")
 args = parser.parse_args()
 
-# EXTENSIONS = ("py", "scm", "sql")
 LANGUAGES = (Language.PYTHON, Language.SCHEME, Language.SQL)
-src = "mentor13"
+src = ""
 version = "0.1.6"
 files = []
 extensions_present = []
@@ -38,10 +36,8 @@ try:
             files.append(f)
             add = LANGUAGES[LANGUAGES.index(split[1])]
             add.file = f
-            # extensions_present.add(add)
             if add not in extensions_present:
                 extensions_present.append(add)
-
 except Exception as e:
     print(e)
     sys.exit("Unexpected files present")
@@ -61,8 +57,8 @@ if system != "Windows":
 else:
     python = "python"
 
-
-if args.func:
+if args.func or args.q:
+    args.func = args.func if args.func else args.q[0]
     remove = list(filter(lambda func: func[-len(args.func):] == args.func, tests.keys()))
     if len(remove) > 1:
         sys.exit("Unexpected error")
@@ -71,10 +67,6 @@ if args.func:
     tests = {key:tests[key] for key in tests.keys() if key == remove[0]}
     Language.tests = tests
 
-# src += "."
-# print("=====================================================================\nAssignment: Discussion {!s}\nOK-disc, version v{!s}\
-# \n=====================================================================\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
-# \nRunning tests\n".format(src[src.index('.') - 2:src.index('.')], version))
 Language.tests = {k:v for k, v in sorted(tests.items(), key=lambda t: tests[t[0]])}
 tests = Language.tests
 
@@ -82,13 +74,16 @@ print("=====================================================================\nAs
 \n=====================================================================\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\
 \nRunning tests\n".format(src[len(src) - 2:len(src)], version))
 
-
 result = ""
 correct = total = 0
 i = 0
+cycled = 0
 while tests:
     ext = extensions_present[i]
     run = ext.run(args, python)
+    cycled += int(run[1] == 0)
+    if cycled == len(extensions_present):
+        break
     result, correct, total = result + run[0], correct + run[1], total + run[2]
     i = (i + 1) % len(extensions_present)
 

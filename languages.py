@@ -15,77 +15,12 @@ offset = 2
 Language.PYTHON.formatting = Formatting(doctest, expect, test, no_tests, buf, offset)
 
 def run(self, args, python):
-    if extension == "py":
-        v = "-v" if args.v else ""
-        interpreter = subprocess.Popen([python, "-B", "-m", "doctest", src, "-v"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)    
-        with open(src, "r") as f:
-            for line in f:
-                if line[:3] == "def":
-                    q = line[4:line.index("(")]
-        if args.v:
-            result += f"---------------------------------------------------------------------\nDoctests for {q}\n\n"
-            expected_out = re.compile(r"Expected:\n.*Got:\n")
-            count = 1
-            found_expected = found_got = ok = False
-            for line in interpreter.stdout:
-                if line == "Trying:\n":
-                    result += f"Case {count}:\n>>> "
-                    found = True
-                    count += 1
-                    total += 1
-                elif line == "Expecting:\n":
-                    found_expected = True
-                elif line == "Got:\n":
-                    save = f"\nError: expected\n    {save}but got\n    "
-                    found_got = True
-                elif line == "ok\n":
-                    result += save + "-- OK! --\n\n"
-                    correct += 1
-                elif found_expected:
-                    save = line.strip() + "\n"
-                    found_expected = False
-                elif found_got:
-                    result += f"{line.strip()}\n{save}{line.strip()}\n\n"
-                    found_got = False
-                elif found:
-                    result += line.strip() + "\n"
-                    found = False
-        else:
-            expected_out = re.compile(r"Expected:\n.*Got:\n")
-            count = 1
-            found_expected = found_got = ok = False
-            for line in interpreter.stdout:
-                if line == "Trying:\n":
-                    save = f"Case {count}:\n>>> "
-                    found = True
-                    count += 1
-                    total += 1
-                # elif line == "Expected:\n":
-                #     result += f"Error: expected\n"
-                #     found = True
-                elif line == "Expecting:\n":
-                    found_expected = True
-                elif line == "Got:\n":
-                    save += f"\nError: expected\n    {expected}but got\n    "
-                    found_got = True
-                elif line == "ok\n":
-                    correct += 1
-                elif found_expected:
-                    expected = line.strip() + "\n"
-                    found_expected = False
-                elif found_got:
-                    line = line.strip() + "\n"
-                    result += f"{save[:save.index('Error') - 1] + line + save[save.index('Error') - 1:]}{line.strip()}\n\n"
-                    break
-                elif found:
-                    save += line.strip() + "\n"
-                    found = False
-def run(self, args, python):
     tests = self.tests
     src = self.file
     result = ""
     prev = None
     total = correct = 0
+    wrong = False
     keys = iter(list(tests.keys()))
     for t in keys:
         if tests[t][0].language == self:
@@ -190,11 +125,6 @@ def run(self, args, python):
             break
     return result, correct, total
 
-# https://medium.com/@mgarod/dynamically-add-a-method-to-a-class-in-python-c49204b85bd6
-# setattr(Language, 'run', run)
-
-# https://stackoverflow.com/questions/972/adding-a-method-to-an-existing-object-instance
-# Language.SCHEME.run = types.MethodType(run, Language.SCHEME)
 Language.SCHEME.run = run.__get__(Language.SCHEME)
 
 Language.SQL = Language("sql", "sqlite3", "sqlite3>", "sql")
