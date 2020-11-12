@@ -8,6 +8,7 @@ A Python client for autograding Python, Scheme, and SQL files. Based on the [OK]
 * Full Python, Scheme, and SQL compatibility
   * Smart question ordering and seamless switching back and forth between consecutive questions in different languages
 * `-q` command line flag
+* Windows compatibility
 
 ### v0.1.5 - 11/7/20
 * `ok-disc`

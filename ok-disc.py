@@ -25,7 +25,7 @@ parser.add_argument("-q", metavar="question_name", dest="q", nargs=1, type=str, 
 args = parser.parse_args()
 
 LANGUAGES = (Language.PYTHON, Language.SCHEME, Language.SQL)
-src = "mentor13"
+src = ""
 version = "0.1.6"
 files = []
 extensions_present = []
