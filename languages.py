@@ -14,7 +14,7 @@ offset = 2
 
 Language.PYTHON.formatting = Formatting(doctest, expect, test, no_tests, buf, offset)
 
-def run(self, args, python):
+def run(self, args, python, **kwargs):
     tests = self.tests
     src = self.file
     result = ""
@@ -23,7 +23,7 @@ def run(self, args, python):
     wrong = False
     keys = iter(list(tests.keys()))
     for t in keys:
-        if tests[t][0].language == self:
+        if not wrong and tests[t][0].language == self:
             while True:
                 interpreter = subprocess.Popen([python, "-B", "-i", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
                 if not prev:
@@ -51,6 +51,7 @@ def run(self, args, python):
                     result += "---------------------------------------------------------------------\nDoctests for {!s}\n\n".format(t[t.index('-') + 2:])
                     result += "Case {!s}:\n".format(count)
                     result += "{!s}\n".format(test_out[0])
+                    wrong = True
                     break
                 correct += int(test_out[1])
                 tests[t].remove(curr)
@@ -65,7 +66,6 @@ def run(self, args, python):
 
 Language.PYTHON.run = run.__get__(Language.PYTHON)
 
-
 Language.SCHEME = Language("scheme", "scheme", "scm>", "scm")
 doctest = re.compile(r"; Q.* - .*")
 expect = re.compile(r"; expect .*")
@@ -75,22 +75,24 @@ buf = re.compile(r";;; Tests\n")
 offset = 0
 Language.SCHEME.formatting = Formatting(doctest, expect, test, no_tests, buf, offset)
 
-def run(self, args, python):
+def run(self, args, python, windows):
     tests = self.tests
     src = self.file
     result = ""
     prev = None
     total = correct = 0
+    wrong = False
     check = '(load-all ".")'
     scheme = subprocess.Popen([python, "scheme", "-i", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
     parens = scheme.communicate(input=check)
     for line in parens:
         if "SyntaxError" in line:
+            import sys
             sys.exit("---------------------------------------------------------------------\n\n{!s} {!s}\n# Error: unexpected end of file\n\n---------------------------------------------------------------------\nTest summary\n    0 test case(s) passed before encountering first failed test case\n".format(self.prompt, check))
     scheme.stdin.close()
     keys = iter(list(tests.keys()))
     for t in keys:
-        if tests[t][0].language == self:
+        if not wrong and tests[t][0].language == self:
             while True:
                 interpreter = subprocess.Popen([python, "scheme", "-i", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
                 for line in interpreter.stdout:
@@ -102,7 +104,9 @@ def run(self, args, python):
                     prev = t
                 curr = tests[t][0]
                 curr.output = curr.output.strip()
-                raw_out = interpreter.communicate(input=curr.test)[0] 
+                raw_out = interpreter.communicate(input=curr.test)[0]
+                if windows:
+                    raw_out = raw_out[1 + len(self.prompt) + 1:]
                 interpreter.stdin.close()
                 test_out = curr.run(raw_out[:raw_out.index("\n{!s}".format(self.prompt))])
                 total += 1
@@ -113,6 +117,7 @@ def run(self, args, python):
                     result += "---------------------------------------------------------------------\nDoctests for {!s}\n\n".format(t[t.index('-') + 2:])
                     result += "Case {!s}:\n".format(count)
                     result += "{!s}\n".format(test_out[0])
+                    wrong = True
                     break
                 correct += int(test_out[1])
                 tests[t].remove(curr)
@@ -127,7 +132,7 @@ def run(self, args, python):
 
 Language.SCHEME.run = run.__get__(Language.SCHEME)
 
-Language.SQL = Language("sql", "sqlite3", "sqlite3>", "sql")
+Language.SQL = Language("sql", "sqlite_shell.py", "sqlite3>", "sql")
 doctest = re.compile(r"-- Q.* - .*")
 expect = re.compile(r"-- expect .*")
 test = re.compile(r"-- .*\n")
@@ -136,21 +141,22 @@ buf = re.compile(r"-- Tests\n")
 offset = 1
 Language.SQL.formatting = Formatting(doctest, expect, test, no_tests, buf, offset)
 
-def run(self, args, python):
+def run(self, args, python, **kwargs):
     tests = self.tests
     src = self.file
     result = ""
     prev = None
     total = correct = 0
+    wrong = False
     keys = iter(list(tests.keys()))
     for t in keys:
-        if tests[t][0].language == self:
+        if not wrong and tests[t][0].language == self:
             while True:
-                interpreter = subprocess.Popen(["sqlite3", "--init", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
+                interpreter = subprocess.Popen([python, "sqlite_shell.py", "-init", src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=0)
                 if not prev:
                     count = 1
                     if args.v:
-                        result += f"---------------------------------------------------------------------\nDoctests for {t[t.index('-') + 2:]}\n\n"
+                        result += "---------------------------------------------------------------------\nDoctests for {!s}\n\n".format(t[t.index('-') + 2:])
                     prev = t
                 curr = tests[t][0]
                 curr.output = curr.output.strip()
@@ -163,12 +169,13 @@ def run(self, args, python):
                 test_out = curr.run(raw_out[:])
                 total += 1
                 if args.v:
-                    result += f"Case {count}:\n"
-                    result += f"{test_out[0]}\n"
+                    result += "Case {!s}:\n".format(count)
+                    result += "{!s}\n".format(test_out[0])
                 elif not test_out[1]:
-                    result += f"---------------------------------------------------------------------\nDoctests for {t[t.index('-') + 2:]}\n\n"
-                    result += f"Case {count}:\n"
-                    result += f"{test_out[0]}\n"
+                    result += "---------------------------------------------------------------------\nDoctests for {!s}\n\n".format(t[t.index('-') + 2:])
+                    result += "Case {!s}:\n".format(count)
+                    result += "{!s}\n".format(test_out[0])
+                    wrong = True
                     break
                 correct += int(test_out[1])
                 tests[t].remove(curr)

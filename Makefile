@@ -5,7 +5,7 @@ all:
 run:
 	python3 ok-disc.py -v
 
-DS_STORE = ./build/.DS_Store
+DS_STORE = build/.DS_Store
 ifneq ("$(wildcard $(DS_Store))","")
 	DEL_DS = rm $(DS_Store)
 else 
@@ -20,7 +20,7 @@ endif
 .PHONY: build
 
 build:
-	@$(delete)
+	$(DEL_DS)
 	@python3 -m zipapp build -m "ok_disc:main" -o ok
 	@make clean
 	@mkdir out

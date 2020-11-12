@@ -25,7 +25,7 @@ parser.add_argument("-q", metavar="question_name", dest="q", nargs=1, type=str, 
 args = parser.parse_args()
 
 LANGUAGES = (Language.PYTHON, Language.SCHEME, Language.SQL)
-src = ""
+src = "mentor13"
 version = "0.1.6"
 files = []
 extensions_present = []
@@ -54,8 +54,10 @@ for ext in extensions_present:
 system = platform.system()
 if system != "Windows":
     python = "python3"
+    windows = False
 else:
     python = "python"
+    windows = True
 
 if args.func or args.q:
     args.func = args.func if args.func else args.q[0]
@@ -77,13 +79,17 @@ print("=====================================================================\nAs
 result = ""
 correct = total = 0
 i = 0
-cycled = 0
+cycled = -1
 while tests:
-    ext = extensions_present[i]
-    run = ext.run(args, python)
-    cycled += int(run[1] == 0)
-    if cycled == len(extensions_present):
+    if i == cycled:
         break
+    ext = extensions_present[i]
+    run = ext.run(args, python, windows=windows)
+    if run[1] == 0 and not args.v:
+        if cycled == -1:
+            cycled = i
+    else:
+        cycled = -1
     result, correct, total = result + run[0], correct + run[1], total + run[2]
     i = (i + 1) % len(extensions_present)
 
