@@ -116,12 +116,15 @@ class Doctest:
         self.output = output
 
     def run(self, actual):
-        if not actual and not self.output:
-            return "{!s} {!s}\n{!s}{!s}".format(self.language.prompt, self.test, actual, "") + "-- OK! --\n", True
-        base = "{!s} {!s}\n{!s}{!s}".format(self.language.prompt, self.test, actual, "" if actual[len(actual) - 1] == "\n" else "\n")
+        tab = "     "
+        if not actual:
+            if not self.output:
+                return "{!s} {!s}\n{!s}{!s}".format(self.language.prompt, self.test, actual, "") + "-- OK! --\n", True
+            base = "{!s} {!s}\n{!s}{!s}".format(self.language.prompt, self.test, actual, "")
+        else:
+            base = "{!s} {!s}\n{!s}{!s}".format(self.language.prompt, self.test, actual, "" if actual[len(actual) - 1] == "\n" else "\n")
         if actual.strip() == self.output.strip() or actual == self.output:
             return base + "-- OK! --\n", True
-        tab = "     "
         spaced_actual = ""
         for c in actual:
             if c == "\n":
@@ -134,7 +137,9 @@ class Doctest:
                 spaced_output += c + tab
             else:
                 spaced_output += c
-        return base + "\nError: expected\n{!s}{!s}\nbut got\n{!s}{!s}\n".format(tab, spaced_output, tab, spaced_actual[:-1] if spaced_actual[len(spaced_actual) - 1] == "\n" else spaced_actual), False
+        if self.output and actual:
+            return base + "\nError: expected\n{!s}{!s}\nbut got\n{!s}{!s}\n".format(tab, spaced_output, tab, spaced_actual[:-1] if spaced_actual[len(spaced_actual) - 1] == "\n" else spaced_actual), False
+        return base + "\nError: expected\n{!s}{!s}\nbut got\n{!s}{!s}\n".format(tab, spaced_output, tab, spaced_actual), False
 
     def __str__(self):
         return "Q{!s} - Input: {!s}, Output: {!s}".format(self.number, self.test, self.output)

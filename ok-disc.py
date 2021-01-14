@@ -86,6 +86,7 @@ result = ""
 correct = total = 0
 i = 0
 cycled = -1
+first = True
 while tests:
     if i == cycled:
         break
@@ -94,11 +95,13 @@ while tests:
     if run[1] == 0 and not args.v:
         if cycled == -1:
             cycled = i
-            continue
+            if not first:
+                continue
     else:
         cycled = -1
     result, correct, total = result + run[0], correct + run[1], total + run[2]
     i = (i + 1) % len(extensions_present)
+    first = False
 
 result += "---------------------------------------------------------------------\nTest summary\n"
 if args.v:
