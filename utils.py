@@ -116,6 +116,8 @@ class Doctest:
         self.output = output
 
     def run(self, actual):
+        if not actual and not self.output:
+            return "{!s} {!s}\n{!s}{!s}".format(self.language.prompt, self.test, actual, "") + "-- OK! --\n", True
         base = "{!s} {!s}\n{!s}{!s}".format(self.language.prompt, self.test, actual, "" if actual[len(actual) - 1] == "\n" else "\n")
         if actual.strip() == self.output.strip() or actual == self.output:
             return base + "-- OK! --\n", True

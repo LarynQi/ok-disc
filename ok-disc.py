@@ -18,15 +18,21 @@ import platform
 import os
 from languages import *
 
-parser = argparse.ArgumentParser(description="A lightweight autograder to test your work!")
-parser.add_argument("func", metavar="function_to_test", nargs="?", default=None, help="function to be tested (optional)")
-parser.add_argument("-v", dest="v", action="store_const", const=True, default=False, help="verbose output")
-parser.add_argument("-q", metavar="question_name", dest="q", nargs=1, type=str, default=None, help="question to be tested")
-args = parser.parse_args()
-
-LANGUAGES = (Language.PYTHON, Language.SCHEME, Language.SQL)
 src = ""
 version = "0.1.6"
+
+parser = argparse.ArgumentParser(prog="ok", description="A lightweight autograder to test your work!")
+parser.add_argument("func", metavar="function_to_test", nargs="?", default=None, help="function to be tested (optional)")
+parser.add_argument("-v", "--verbose", dest="v", action="store_const", const=True, default=False, help="verbose output")
+parser.add_argument("-q", metavar="question_name", dest="q", nargs=1, type=str, default=None, help="question to be tested")
+parser.add_argument("--version", dest="ask_version", action="store_const", const=True, default=False, help="print the version number and exit")
+
+args = parser.parse_args()
+
+if args.ask_version:
+    sys.exit("ok-disc==v{!s}".format(version))
+
+LANGUAGES = (Language.PYTHON, Language.SCHEME, Language.SQL)
 files = []
 extensions_present = []
 try:
@@ -63,7 +69,7 @@ if args.func or args.q:
     args.func = args.func if args.func else args.q[0]
     remove = list(filter(lambda func: func[-len(args.func):] == args.func, tests.keys()))
     if len(remove) > 1:
-        sys.exit("Unexpected error")
+        sys.exit("An unexpected error has occurred")
     elif len(remove) == 0:
         sys.exit("Invalid function name")
     tests = {key:tests[key] for key in tests.keys() if key == remove[0]}
@@ -88,6 +94,7 @@ while tests:
     if run[1] == 0 and not args.v:
         if cycled == -1:
             cycled = i
+            continue
     else:
         cycled = -1
     result, correct, total = result + run[0], correct + run[1], total + run[2]
@@ -95,7 +102,7 @@ while tests:
 
 result += "---------------------------------------------------------------------\nTest summary\n"
 if args.v:
-    result += "    Passed: {!s}\n    Failed: {!s}\n[ooooook....] {!s}% passed\n".format(correct, total - correct, 100 * round(correct / total, 3))
+    result += "    Passed: {!s}\n    Failed: {!s}\n[ooooook....] {!s}% passed\n".format(correct, total - correct, round(100 * correct / total, 3))
 else:
     if correct == total:
         result += "    {!s} test cases passed! No cases failed.\n".format(correct)

@@ -4,7 +4,7 @@ import types
 
 Language.PYTHON = Language("python", "", ">>>", "py")
 
-doctest = re.compile(r"# Q.* - .*")
+doctest = re.compile(r" *# Q.* - .*")
 # https://stackoverflow.com/questions/940822/regular-expression-syntax-for-match-nothing
 expect = re.compile(r"$^")
 test = re.compile(r" *>>> .*\n")
@@ -22,6 +22,8 @@ def run(self, args, python, **kwargs):
     total = correct = 0
     wrong = False
     keys = iter(list(tests.keys()))
+    inputs = ""
+    outputs = ""
     for t in keys:
         if not wrong and tests[t][0].language == self:
             while True:
@@ -32,17 +34,24 @@ def run(self, args, python, **kwargs):
                         result += "---------------------------------------------------------------------\nDoctests for {!s}\n\n".format(t[t.index('-') + 2:])
                     prev = t
                 curr = tests[t][0]
+                inputs += curr.test + "\n"
                 curr.output = curr.output.strip()
-                raw_out = interpreter.communicate(input=curr.test)
+                raw_out = interpreter.communicate(input=inputs)
                 interpreter.stdin.close()
                 out = ""
                 for o in raw_out:
                     out += o
                 try:
-                    test_out = curr.run(out[:out.index("\n{!s}".format(self.prompt))])
+                    if not outputs:
+                        test_out = curr.run(raw_out[0])
+                        if raw_out[0]:
+                            outputs += raw_out[0].strip() + "\n"
+                    else:
+                        test_out = curr.run(raw_out[0][raw_out[0].index(outputs) + len(outputs):])
+                        outputs = raw_out[0]             
                 except Exception as e:
                     import sys
-                    sys.exit(out)
+                    sys.exit("An unexpected error has occurred")
                 total += 1
                 if args.v:
                     result += "Case {!s}:\n".format(count)
@@ -91,6 +100,8 @@ def run(self, args, python, windows):
             sys.exit("---------------------------------------------------------------------\n\n{!s} {!s}\n# Error: unexpected end of file\n\n---------------------------------------------------------------------\nTest summary\n    0 test case(s) passed before encountering first failed test case\n".format(self.prompt, check))
     scheme.stdin.close()
     keys = iter(list(tests.keys()))
+    inputs = ""
+    outputs = 0
     for t in keys:
         if not wrong and tests[t][0].language == self:
             while True:
@@ -103,11 +114,17 @@ def run(self, args, python, windows):
                         result += "---------------------------------------------------------------------\nDoctests for {!s}\n\n".format(t[t.index('-') + 2:])
                     prev = t
                 curr = tests[t][0]
+                inputs += curr.test + "\n"
                 curr.output = curr.output.strip()
-                raw_out = interpreter.communicate(input=curr.test)[0]
+                raw_out = interpreter.communicate(input=inputs)[0]
                 if windows:
                     raw_out = raw_out[1 + len(self.prompt) + 1:]
                 interpreter.stdin.close()
+                output_count = 0
+                while output_count < outputs:
+                    raw_out = raw_out[raw_out.index("\nscm>") + 6:]
+                    output_count += 1
+                outputs += 1
                 test_out = curr.run(raw_out[:raw_out.index("\n{!s}".format(self.prompt))])
                 total += 1
                 if args.v:
