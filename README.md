@@ -4,6 +4,12 @@ A Python client for autograding Python, Scheme, and SQL files. Based on the [OK]
 
 ## Changelog
 
+### v0.1.7 - 1/13/21
+* Persistent sessions workaround
+  * Multi-line doctests now supported
+* Fix correctness percentage calculation
+* Add `--verbose` and `--version`
+
 ### v0.1.6 - 11/11/20
 * Full Python, Scheme, and SQL compatibility
   * Smart question ordering and seamless switching back and forth between consecutive questions in different languages
