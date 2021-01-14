@@ -19,7 +19,7 @@ import os
 from languages import *
 
 src = ""
-version = "0.1.6"
+version = "0.1.7"
 
 parser = argparse.ArgumentParser(prog="ok", description="A lightweight autograder to test your work!")
 parser.add_argument("func", metavar="function_to_test", nargs="?", default=None, help="function to be tested (optional)")
