@@ -4,6 +4,9 @@ A Python client for autograding Python, Scheme, and SQL files. Based on the [OK]
 
 ## Changelog
 
+### v0.1.8 - 1/23/21
+* Allow for ordinary function descriptions alongside `ok-disc` test cases within Python docstrings.
+
 ### v0.1.7 - 1/13/21
 * Persistent sessions workaround
   * Multi-line doctests now supported

@@ -24,8 +24,10 @@ def _search(src, language):
                     pass
                 elif re.match(language.formatting.expect, line) and line != "\n":
                     tests[question][len(tests[question]) - 1].output += line.strip()[9 + offset:] + "\n"
-                elif line == "\n" or re.match(language.formatting.no_tests, line):
-                    found = False
+                elif (line == "\n" and language != Language.PYTHON) or re.match(language.formatting.no_tests, line):
+                    match = re.match(language.formatting.no_tests, line)
+                    if match and match.span()[1] - match.span()[0] > 0:
+                        found = False
                 elif re.match(language.formatting.test, line):
                     tests[question] = tests.get(question, []) + [Doctest(language, number, line.strip()[2 + offset:])]
                     Doctest.max_q = max(Doctest.max_q, len(number.replace(".", "")))
